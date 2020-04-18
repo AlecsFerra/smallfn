@@ -1,7 +1,3 @@
 fn foo(bar: Int, baz: Float): Int = add(bar, baz)
 
-fn main(): Unit = {
-    let a: Int = 32,
-    let b = 32,
-    a + b
-}
+fn main(): Unit = add(12, foo(32, 22.4))

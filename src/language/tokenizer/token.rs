@@ -15,7 +15,9 @@ pub enum TokenKind {
     LParen,
     RParen,
     Coma,
-    Assign
+    Assign,
+    Do,
+    End,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -42,11 +44,9 @@ lazy_static! {
         m.insert("false", TokenKind::BooleanLiteral(false));
         m.insert("let",   TokenKind::Let);
         m.insert("fn",    TokenKind::Fn);
-        m.insert(",",     TokenKind::Colon);
-        m.insert("(",     TokenKind::LParen);
-        m.insert(")",     TokenKind::RParen);
-        m.insert(",",     TokenKind::Coma);
         m.insert("=",     TokenKind::Assign);
+        m.insert("do",    TokenKind::Do);
+        m.insert("end",   TokenKind::End);
         m
     };
 }
