@@ -1,0 +1,5 @@
+def fact(in: Int) =
+    if eq(0 in) then
+        1
+    else
+        add(in fact(sub(in 1)))

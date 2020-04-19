@@ -1,7 +1,7 @@
 use std::iter::Peekable;
 use std::str::Chars;
 
-use crate::language::tokenizer::token::{TokenKind, Token, RESERVED_KEYWORDS};
+use crate::language::tokenizer::token::{RESERVED_KEYWORDS, Token, TokenKind};
 
 macro_rules! push_while {
     ($lex: ident, $target: ident, $cond: expr) => {{
@@ -42,23 +42,21 @@ impl Iterator for Lexer<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         match self.chars.peek() {
             None => None,
-            Some(char) =>match char {
-                '+'  | '-' | '0' ..= '9' => Some(self.next_number()),
-                '\"'                     => Some(self.next_string_literal()),
-                '\''                     => Some(self.next_char_literal()),
-                '('                      => Some(self.skip_construct(TokenKind::LParen)),
-                ')'                      => Some(self.skip_construct(TokenKind::RParen)),
-                ':'                      => Some(self.skip_construct(TokenKind::Colon)),
-                ','                      => Some(self.skip_construct(TokenKind::Coma)),
-                ' ' | '\t' | '\n'        => self.skip_blank(),
-                _                        => Some(self.next_id())
+            Some(char) => match char {
+                '+' | '-' | '0'..='9' => Some(self.next_number()),
+                '\"' => Some(self.next_string_literal()),
+                '\'' => Some(self.next_char_literal()),
+                '(' => Some(self.skip_construct(TokenKind::LParen)),
+                ')' => Some(self.skip_construct(TokenKind::RParen)),
+                ':' => Some(self.skip_construct(TokenKind::Colon)),
+                ' ' | '\t' | '\n' => self.skip_blank(),
+                _ => Some(self.next_id())
             }
         }
     }
 }
 
 impl Lexer<'_> {
-
     fn construct_token(&self, t_type: TokenKind) -> Result<Token, String> {
         Ok(Token::new(t_type, self.current_line, self.current_char))
     }
@@ -79,7 +77,7 @@ impl Lexer<'_> {
                 number.push('.');
                 push_while!(self, number, |c| c.is_numeric());
                 self.construct_token(TokenKind::FloatLiteral(number.parse().unwrap()))
-            },
+            }
             _ => self.construct_token(TokenKind::IntegerLiteral(number.parse().unwrap()))
         }
     }
@@ -90,23 +88,23 @@ impl Lexer<'_> {
         let mut is_escaped = false;
         let mut string = "".to_string();
         while self.chars.peek().map_or(false, |c| (is_escaped || c.clone() != '"')) {
-           if is_escaped {
-               string.push(get_or_propagate!(self.escape_next()))
-           } else {
-               match self.chars.next() {
-                   Some('\'') => is_escaped = true,
-                   Some(char) =>string.push(char),
-                   None => return Err(format!("Expected closing \" at {}:{} ",
-                                              self.current_line, self.current_char))
-               }
-           }
+            if is_escaped {
+                string.push(get_or_propagate!(self.escape_next()))
+            } else {
+                match self.chars.next() {
+                    Some('\'') => is_escaped = true,
+                    Some(char) => string.push(char),
+                    None => return Err(format!("Expected closing \" at {}:{} ",
+                                               self.current_line, self.current_char))
+                }
+            }
             self.current_char += 1
         }
         self.current_char += 1;
         match self.chars.next() {
             Some('\"') => self.construct_token(TokenKind::StringLiteral(string)),
-            _          => Err(format!("Expected closing \" at {}:{} ",
-                                      self.current_line, self.current_char))
+            _ => Err(format!("Expected closing \" at {}:{} ",
+                             self.current_line, self.current_char))
         }
     }
 
@@ -114,32 +112,32 @@ impl Lexer<'_> {
         self.chars.next();
         self.current_char += 1;
         let char = match self.chars.next() {
-            Some('\\')       => get_or_propagate!(self.escape_next()),
+            Some('\\') => get_or_propagate!(self.escape_next()),
             Some(char) => char,
-            None             => return Err(format!("Expected character at {}:{} but EOF reached",
-                                                   self.current_line, self.current_char))
+            None => return Err(format!("Expected character at {}:{} but EOF reached",
+                                       self.current_line, self.current_char))
         };
         self.current_char += 1;
         match self.chars.next() {
             Some('\'') => self.construct_token(TokenKind::CharLiteral(char)),
-            _          => Err(format!("Expected closing \' at {}:{} ",
-                                      self.current_line, self.current_char))
+            _ => Err(format!("Expected closing \' at {}:{} ",
+                             self.current_line, self.current_char))
         }
     }
 
     pub fn escape_next(&mut self) -> Result<char, String> {
         match self.chars.next() {
             Some('\'') => Ok('\''),
-            Some('"')  => Ok('"'),
+            Some('"') => Ok('"'),
             Some('\\') => Ok('\\'),
-            Some('n')  => Ok('\n'),
-            Some('r')  => Ok('\r'),
-            Some('t')  => Ok('\t'),
-            Some('0')  => Ok('\0'),
+            Some('n') => Ok('\n'),
+            Some('r') => Ok('\r'),
+            Some('t') => Ok('\t'),
+            Some('0') => Ok('\0'),
             Some(unexpected) => Err(format!("Lex error: unexpected escape {} at {}:{}",
                                             unexpected, self.current_line, self.current_char)),
-            None                   => Err(format!("Expected character at {}:{} but EOF reached",
-                                            self.current_line, self.current_char))
+            None => Err(format!("Expected character at {}:{} but EOF reached",
+                                self.current_line, self.current_char))
         }
     }
 
@@ -165,7 +163,6 @@ impl Lexer<'_> {
             None => self.construct_token(TokenKind::Id(identifier))
         }
     }
-
 }
 
 #[cfg(test)]
@@ -211,7 +208,7 @@ mod tests {
 
     #[test]
     fn full_test() {
-        let input = "fn 44.33 -32 'b' \"esketit\" () \n , true false let =".to_string();
+        let input = "fn 44.33 -32 'b' \"esketit\" () \n   true false let =".to_string();
         let mut lexer = Lexer::new(&input);
 
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::Fn, 0, 2))));
@@ -221,11 +218,9 @@ mod tests {
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::StringLiteral("esketit".to_string()), 0, 24))));
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::LParen, 0, 26))));
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::RParen, 0, 27))));
-        assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::Coma, 1, 2))));
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::BooleanLiteral(true), 1, 7))));
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::BooleanLiteral(false), 1, 13))));
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::Let, 1, 17))));
         assert_eq!(lexer.next(), Some(Ok(Token::new(TokenKind::Assign, 1, 19))));
     }
-
 }

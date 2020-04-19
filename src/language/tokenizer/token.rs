@@ -1,5 +1,6 @@
-use lazy_static::lazy_static;
 use std::collections::HashMap;
+
+use lazy_static::lazy_static;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum TokenKind {
@@ -14,10 +15,12 @@ pub enum TokenKind {
     Colon,
     LParen,
     RParen,
-    Coma,
     Assign,
     Do,
     End,
+    If,
+    Then,
+    Else,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +50,9 @@ lazy_static! {
         m.insert("=",     TokenKind::Assign);
         m.insert("do",    TokenKind::Do);
         m.insert("end",   TokenKind::End);
+        m.insert("if",   TokenKind::If);
+        m.insert("then",   TokenKind::Then);
+        m.insert("else",   TokenKind::Else);
         m
     };
 }
