@@ -122,4 +122,27 @@ mod tests {
                         ])))))
         ])))
     }
+
+    #[test]
+    fn functional_test() {
+        println!("starting test");
+        let str = "
+        fn funny(in: (Int (Float) to Int) to Bool): Int = 33
+        ".to_string();
+        let lexer = Lexer::new(&str);
+        let tokens = lexer.take_while(|x| x.is_ok())
+            .map(|x| x.unwrap())
+            .collect::<Vec<_>>();
+        let mut parser = Parser::new(&tokens);
+        assert_eq!(parser.parse(), Ok(
+            AST::Block(vec![
+                AST::FunctionDeclaration(
+                    "funny".to_string(), vec![
+                        ("in".to_string(), Type::Function(vec![
+                            Type::Integer,
+                            Type::Function(vec![Type::Float], Box::from(Type::Integer))], Box::from(Type::Boolean)))],
+                    Type::Integer,
+                    Box::from(AST::IntegerLiteral(33)))])))
+    }
+
 }

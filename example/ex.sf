@@ -1,3 +1,11 @@
 fn foo(bar: Int baz: Float): Int = add(bar baz)
 
-fn main(): Unit = add(12 foo(32 22.4))
+fn main(): Unit = do
+    add(12 foo(32 22.4))
+    let a = 22
+    let b: Int = 33
+    print(fact(b))
+end
+
+fn fact(in: Int): Int = if eq(0 in) then 1
+                                    else add(in fact(sub(in 1)))

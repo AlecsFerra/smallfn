@@ -33,12 +33,6 @@ macro_rules! get_or_propagate {
             Err(err) => return Err(err),
         }
     }};
-    ($provider: expr, $err: expr) => {{
-        match $provider {
-            Some(data) => data,
-            None => return $err
-        }
-    }};
 }
 
 pub struct Parser<'a> {
@@ -88,33 +82,48 @@ impl Parser<'_> {
 
         let mut params = Vec::new();
         while let Some(token) = self.tokens.next() {
-            if token.kind == TokenKind::RParen {
-                break;
-            }
+            if token.kind == TokenKind::RParen { break }
             let id = expect!(Some(token), Err(format!("Expected identifier")));
-            let id_type = get_or_propagate!(self.type_dec(), Err(format!("Expected identifier type")));
+            let id_type = get_or_propagate!(self.parse_type_declaration());
             params.push((id, id_type));
         }
 
-        let ret_type = get_or_propagate!(self.type_dec(), Err(format!("Expected return type")));
+        let ret_type = get_or_propagate!(self.parse_type_declaration());
         expect!(TokenKind::Assign, self.tokens.next(), Err(format!("Expected =")));
         Ok(AST::FunctionDeclaration(id, params, ret_type, Box::from(get_or_propagate!(self.parse_block_or_expression()))))
     }
 
-    fn type_dec(&mut self) -> Option<Type> {
-        expect!(TokenKind::Colon, self.tokens.peek(), None);
+    fn parse_type_declaration(&mut self) -> Result<Type, String> {
+        expect!(TokenKind::Colon, self.tokens.peek(), Err(format!("Expected :")));
         self.tokens.next();
-        let ttype = expect!(self.tokens.next(), None);
-        match KNOWN_TYPES.get(ttype.as_str()) {
-            Some(ttype) => Some(ttype.clone()),
-            _ => None
+        self.parse_type()
+    }
+
+    fn parse_type(&mut self) -> Result<Type, String> {
+        match self.tokens.next() {
+            None => Err(format!("cannot find type")),
+            Some(token) => match token.clone().kind {
+                TokenKind::Id(id) => Ok(KNOWN_TYPES.get(id.as_str()).unwrap().clone()),
+                TokenKind::LParen => {
+                    let mut params = Vec::new();
+                    while let Some(token) = self.tokens.peek() {
+                        if token.kind == TokenKind::RParen { break }
+                        params.push(get_or_propagate!(self.parse_type()));
+                    }
+                    self.tokens.next();
+                    expect!(TokenKind::To, self.tokens.next(), Err(format!("Expected to")));
+                    let ret = get_or_propagate!(self.parse_type());
+                    Ok(Type::Function(params, Box::from(ret)))
+                },
+                err => { println!("unm: {:?}", err); Err(format!("cannot find type")) }
+            }
         }
     }
 
     fn parse_variable_declaration(&mut self) -> Result<AST, String> {
         self.tokens.next();
         let id = expect!(self.tokens.next(), Err(format!("Expected identifier")));
-        let maybe_type = self.type_dec();
+        let maybe_type = self.parse_type_declaration().ok();
         expect!(TokenKind::Assign, self.tokens.next(), Err(format!("Expected =")));
         let expr = get_or_propagate!(self.parse_block_or_expression());
         Ok(AST::VariableDeclaration(id, maybe_type, Box::from(expr)))
@@ -159,9 +168,7 @@ impl Parser<'_> {
 
                             let mut params = Vec::new();
                             while let Some(token) = self.tokens.peek() {
-                                if token.kind == TokenKind::RParen {
-                                    break;
-                                }
+                                if token.kind == TokenKind::RParen { break }
                                 params.push(get_or_propagate!(self.parse_block_or_expression()));
                             }
 

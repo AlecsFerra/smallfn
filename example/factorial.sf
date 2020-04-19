@@ -1,4 +1,4 @@
-def fact(in: Int) =
+fn fact(in: Int): Int =
     if eq(0 in) then
         1
     else

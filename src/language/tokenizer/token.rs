@@ -21,6 +21,7 @@ pub enum TokenKind {
     If,
     Then,
     Else,
+    To,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -53,6 +54,7 @@ lazy_static! {
         m.insert("if",   TokenKind::If);
         m.insert("then",   TokenKind::Then);
         m.insert("else",   TokenKind::Else);
+        m.insert("to",   TokenKind::To);
         m
     };
 }

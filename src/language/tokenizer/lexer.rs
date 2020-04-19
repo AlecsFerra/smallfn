@@ -134,7 +134,7 @@ impl Lexer<'_> {
             Some('r') => Ok('\r'),
             Some('t') => Ok('\t'),
             Some('0') => Ok('\0'),
-            Some(unexpected) => Err(format!("Lex error: unexpected escape {} at {}:{}",
+            Some(unexpected) => Err(format!("Unexpected escape {} at {}:{}",
                                             unexpected, self.current_line, self.current_char)),
             None => Err(format!("Expected character at {}:{} but EOF reached",
                                 self.current_line, self.current_char))
@@ -154,7 +154,6 @@ impl Lexer<'_> {
     pub fn next_id(&mut self) -> Result<Token, String> {
         let mut identifier = "".to_string();
         push_while!(self, identifier, |c| !c.is_whitespace()
-                                          && c.clone() != ','
                                           && c.clone() != ')'
                                           && c.clone() != '('
                                           && c.clone() != ':');
