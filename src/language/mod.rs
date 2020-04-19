@@ -1,6 +1,7 @@
 pub mod tokenizer;
 pub mod grammar;
 pub mod types;
+pub mod validation;
 
 #[cfg(test)]
 mod tests {
