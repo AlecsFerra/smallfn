@@ -3,9 +3,9 @@ pub mod parser;
 
 #[cfg(test)]
 mod tests {
-    use crate::language::tokenizer::token::{Token, TokenKind};
     use crate::language::grammar::ast::AST;
     use crate::language::grammar::parser::Parser;
+    use crate::language::tokenizer::token::{Token, TokenKind};
     use crate::language::types::Type;
 
     #[test]

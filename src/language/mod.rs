@@ -145,5 +145,4 @@ mod tests {
                     Type::Integer,
                     Box::from(AST::IntegerLiteral(33)))])))
     }
-
 }

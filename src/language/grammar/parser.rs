@@ -82,7 +82,7 @@ impl Parser<'_> {
 
         let mut params = Vec::new();
         while let Some(token) = self.tokens.next() {
-            if token.kind == TokenKind::RParen { break }
+            if token.kind == TokenKind::RParen { break; }
             let id = expect!(Some(token), Err(format!("Expected identifier")));
             let id_type = get_or_propagate!(self.parse_type_declaration());
             params.push((id, id_type));
@@ -107,15 +107,18 @@ impl Parser<'_> {
                 TokenKind::LParen => {
                     let mut params = Vec::new();
                     while let Some(token) = self.tokens.peek() {
-                        if token.kind == TokenKind::RParen { break }
+                        if token.kind == TokenKind::RParen { break; }
                         params.push(get_or_propagate!(self.parse_type()));
                     }
                     self.tokens.next();
                     expect!(TokenKind::To, self.tokens.next(), Err(format!("Expected to")));
                     let ret = get_or_propagate!(self.parse_type());
                     Ok(Type::Function(params, Box::from(ret)))
-                },
-                err => { println!("unm: {:?}", err); Err(format!("cannot find type")) }
+                }
+                err => {
+                    println!("unm: {:?}", err);
+                    Err(format!("cannot find type"))
+                }
             }
         }
     }
@@ -168,7 +171,7 @@ impl Parser<'_> {
 
                             let mut params = Vec::new();
                             while let Some(token) = self.tokens.peek() {
-                                if token.kind == TokenKind::RParen { break }
+                                if token.kind == TokenKind::RParen { break; }
                                 params.push(get_or_propagate!(self.parse_block_or_expression()));
                             }
 

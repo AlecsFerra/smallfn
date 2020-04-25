@@ -1,6 +1,6 @@
 use crate::language::types::Type;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum AST {
     Block(Vec<AST>),
     FunctionDeclaration(String, Vec<(String, Type)>, Type, Box<AST>),

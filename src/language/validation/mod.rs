@@ -5,8 +5,8 @@ pub mod symbol_table;
 mod tests {
     use crate::language::grammar::parser::Parser;
     use crate::language::tokenizer::lexer::Lexer;
-    use crate::language::validation::analyzer::StaticAnalyzer;
     use crate::language::types::Type;
+    use crate::language::validation::analyzer::StaticAnalyzer;
 
     #[test]
     fn fib_test() {
@@ -79,7 +79,7 @@ mod tests {
         assert_eq!(analyzer.analyze(ast.unwrap()), Ok(
             Type::Function(
                 vec![Type::Integer],
-                Box::from(Type::Integer)
+                Box::from(Type::Integer),
             )
         ))
     }
@@ -100,5 +100,4 @@ mod tests {
         let mut analyzer = StaticAnalyzer::new();
         assert_eq!(analyzer.analyze(ast.unwrap()), Err(String::from("Function husky has mismatched types")))
     }
-
 }
