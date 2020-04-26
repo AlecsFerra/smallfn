@@ -22,10 +22,9 @@ impl Memory {
         self.memory_frame.pop();
     }
 
-
     pub fn insert_value(&mut self, key: String, value: Value) {
         let mut current_frame = self.memory_frame.pop().unwrap();
-        current_frame.insert(key.clone(), value);
+        current_frame.insert(key, value);
         self.memory_frame.push(current_frame);
     }
 
